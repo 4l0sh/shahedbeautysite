@@ -11,6 +11,56 @@ dotenv.config();
 const app = express();
 const port = 4000;
 
+// Basic configuration checks (won't leak secrets)
+const mask = (val) =>
+  val ? `${val.slice(0, 4)}...${val.slice(-4)}` : "<unset>";
+if (!process.env.MOLLIE_API_KEY) {
+  console.warn(
+    "[config] MOLLIE_API_KEY is NOT set. Payments will fail with 'Could not authenticate request'."
+  );
+} else {
+  console.log(
+    `[config] Mollie key present: ${mask(process.env.MOLLIE_API_KEY)}`
+  );
+}
+if (!process.env.FRONTEND_URL) {
+  console.warn("[config] FRONTEND_URL is NOT set. Redirects may be wrong.");
+}
+if (!process.env.VITE_API_URL) {
+  console.warn("[config] VITE_API_URL is NOT set. Webhook URL may be wrong.");
+}
+
+// Derive clean base URLs for redirect and webhook
+function cleanBaseUrl(url) {
+  try {
+    if (!url) return "";
+    const u = new URL(url);
+    return u.origin; // keep only scheme+host (and port if any)
+  } catch {
+    return "";
+  }
+}
+
+const FRONTEND_BASE = cleanBaseUrl(process.env.FRONTEND_URL);
+const API_BASE = cleanBaseUrl(
+  process.env.VITE_API_URL || process.env.RENDER_EXTERNAL_URL
+);
+
+if (!API_BASE) {
+  console.warn(
+    "[config] Could not derive API base URL. Set VITE_API_URL or rely on RENDER_EXTERNAL_URL (auto on Render)."
+  );
+} else {
+  console.log(`[config] API base URL: ${API_BASE}`);
+}
+if (!FRONTEND_BASE) {
+  console.warn(
+    "[config] Could not derive FRONTEND base URL. Set FRONTEND_URL."
+  );
+} else {
+  console.log(`[config] Frontend base URL: ${FRONTEND_BASE}`);
+}
+
 const mollieClient = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY });
 app.post("/api/create-payment", async (req, res) => {
   try {
@@ -22,8 +72,10 @@ app.post("/api/create-payment", async (req, res) => {
         currency: "EUR",
       },
       description: description,
-      redirectUrl: `${process.env.FRONTEND_URL}/payment-success?order=${orderId}`,
-      webhookUrl: `${process.env.VITE_API_URL}/api/payment-webhook`,
+      redirectUrl: `${
+        FRONTEND_BASE || "http://localhost:5173"
+      }/payment-success?order=${orderId}`,
+      webhookUrl: `${API_BASE || "http://localhost:4000"}/api/payment-webhook`,
       metadata: {
         orderId: orderId,
       },
@@ -73,9 +125,34 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 //routes
 
+// Health check for Mollie credentials (for debugging only)
+app.get("/api/health/mollie", async (req, res) => {
+  try {
+    if (!process.env.MOLLIE_API_KEY) {
+      return res
+        .status(500)
+        .json({ ok: false, reason: "MOLLIE_API_KEY missing" });
+    }
+    // Try a lightweight page call to verify credentials
+    await mollieClient.payments.page({ limit: 1 });
+    return res.json({ ok: true });
+  } catch (err) {
+    const detail =
+      err?.response?.body?.detail || err?.response?.body?.title || err.message;
+    console.error("[health] Mollie check failed:", detail);
+    return res.status(500).json({ ok: false, detail });
+  }
+});
+
 //submit appointment
 app.post("/api/appointments", async (req, res) => {
   try {
+    if (!process.env.MOLLIE_API_KEY) {
+      return res.status(500).json({
+        error: "Payment provider not configured",
+        details: "MOLLIE_API_KEY missing",
+      });
+    }
     console.log("Received appointment request:", req.body);
 
     // Create payment first
@@ -92,8 +169,10 @@ app.post("/api/appointments", async (req, res) => {
         currency: "EUR",
       },
       description: "Laser Treatment Appointment",
-      redirectUrl: `${process.env.FRONTEND_URL}/payment-success?order=${appointmentId}`,
-      webhookUrl: `${process.env.VITE_API_URL}/api/payment-webhook`,
+      redirectUrl: `${
+        FRONTEND_BASE || "http://localhost:5173"
+      }/payment-success?order=${appointmentId}`,
+      webhookUrl: `${API_BASE || "http://localhost:4000"}/api/payment-webhook`,
       metadata: {
         orderId: appointmentId,
       },
@@ -289,9 +368,11 @@ app.post("/api/appointments", async (req, res) => {
   } catch (error) {
     console.error("Error creating appointment:", error);
     console.error("SendGrid error details:", error.response?.body);
+    const mollieDetail =
+      error?.response?.body?.detail || error?.response?.body?.title;
     res.status(500).json({
       error: "Failed to create appointment",
-      details: error.response?.body?.errors || error.message,
+      details: mollieDetail || error.response?.body?.errors || error.message,
     });
   }
 });
