@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { saveAppointmentToDatabase } from "../utils/saveAppointment"
-import "./booking.css"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { saveAppointmentToDatabase } from "../utils/saveAppointment";
+import "./booking.css";
 
 export default function Booking() {
-  const navigate = useNavigate()
-  const [step, setStep] = useState(1)
-  const [submitting, setSubmitting] = useState(false)
-  const [confirmed, setConfirmed] = useState(false)
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
   const [bookingData, setBookingData] = useState({
     pkg: "",
     date: null,
@@ -18,7 +18,7 @@ export default function Booking() {
     email: "",
     phone: "",
     notes: "",
-  })
+  });
 
   const packages = [
     {
@@ -45,64 +45,83 @@ export default function Booking() {
       icon: "👙",
       isSpecial: false,
     },
-  ]
+  ];
 
-  const timeSlots = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"]
+  const timeSlots = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"];
 
   const getAvailableDates = () => {
-    const dates = []
-    const today = new Date()
+    const dates = [];
+    const today = new Date();
     for (let i = 1; i <= 14; i++) {
-      const date = new Date(today)
-      date.setDate(today.getDate() + i)
-      dates.push(date)
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      dates.push(date);
     }
-    return dates
-  }
+    return dates;
+  };
 
-  const availableDates = getAvailableDates()
+  const availableDates = getAvailableDates();
 
   const updateBookingData = (field, value) => {
-    setBookingData({ ...bookingData, [field]: value })
-  }
+    setBookingData({ ...bookingData, [field]: value });
+  };
 
   const canContinue = () => {
-    if (step === 1) return bookingData.pkg !== ""
-    if (step === 2) return bookingData.date !== null && bookingData.time !== ""
+    if (step === 1) return bookingData.pkg !== "";
+    if (step === 2) return bookingData.date !== null && bookingData.time !== "";
     if (step === 3)
-      return bookingData.name.length > 1 && /\S+@\S+\.\S+/.test(bookingData.email) && bookingData.phone.length >= 7
-    return true
-  }
+      return (
+        bookingData.name.length > 1 &&
+        /\S+@\S+\.\S+/.test(bookingData.email) &&
+        bookingData.phone.length >= 7
+      );
+    return true;
+  };
 
   const handleSubmit = async () => {
-    setSubmitting(true)
-    
+    setSubmitting(true);
+
     try {
-      console.log('Attempting to save appointment:', bookingData);
-      
-      // Save appointment to database
-      const result = await saveAppointmentToDatabase(bookingData);
-      console.log('Appointment saved successfully:', result);
-      
-      // Set confirmed state after successful save
-      setConfirmed(true)
-      setSubmitting(false)
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+      // First create the appointment and get the payment URL
+      const response = await fetch(`${apiUrl}/api/appointments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create appointment");
+      }
+
+      const data = await response.json();
+
+      // Redirect to Mollie payment page
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        throw new Error("No payment URL received");
+      }
     } catch (error) {
-      console.error('Failed to save appointment:', error);
-      alert('Er is een fout opgetreden bij het opslaan van uw afspraak. Probeer het opnieuw.');
-      setSubmitting(false)
+      console.error("Failed to process booking:", error);
+      alert("Er is een fout opgetreden. Probeer het opnieuw.");
+      setSubmitting(false);
     }
-  }
+  };
 
   const downloadCalendar = () => {
-    if (!bookingData.date || !bookingData.time) return
+    if (!bookingData.date || !bookingData.time) return;
 
-    const [hours, minutes] = bookingData.time.split(":").map(Number)
-    const startDate = new Date(bookingData.date)
-    startDate.setHours(hours, minutes, 0, 0)
-    const endDate = new Date(startDate.getTime() + 45 * 60 * 1000)
+    const [hours, minutes] = bookingData.time.split(":").map(Number);
+    const startDate = new Date(bookingData.date);
+    startDate.setHours(hours, minutes, 0, 0);
+    const endDate = new Date(startDate.getTime() + 45 * 60 * 1000);
 
-    const formatDate = (date) => date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z"
+    const formatDate = (date) =>
+      date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
     const icsContent = [
       "BEGIN:VCALENDAR",
@@ -113,22 +132,26 @@ export default function Booking() {
       `DTSTAMP:${formatDate(new Date())}`,
       `DTSTART:${formatDate(startDate)}`,
       `DTEND:${formatDate(endDate)}`,
-      `SUMMARY:Laser Ontharing — ${packages.find((p) => p.id === bookingData.pkg)?.name}`,
+      `SUMMARY:Laser Ontharing — ${
+        packages.find((p) => p.id === bookingData.pkg)?.name
+      }`,
       "LOCATION:ICONIC Diamond Diode Laser Kliniek",
       "END:VEVENT",
       "END:VCALENDAR",
-    ].join("\n")
+    ].join("\n");
 
-    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = "afspraak.ics"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
+    const blob = new Blob([icsContent], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "afspraak.ics";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const [instructionsChecked, setInstructionsChecked] = useState(false);
   const [showInstructionsModal, setShowInstructionsModal] = useState(true);
@@ -141,8 +164,8 @@ export default function Booking() {
             <div className="confirmed-icon">✅</div>
             <h1 className="confirmed-title">Afspraak Bevestigd!</h1>
             <p className="confirmed-text">
-              We hebben een bevestiging naar uw e-mail gestuurd. Voeg het toe aan uw agenda hieronder, of stuur ons een
-              bericht bij vragen.
+              We hebben een bevestiging naar uw e-mail gestuurd. Voeg het toe
+              aan uw agenda hieronder, of stuur ons een bericht bij vragen.
             </p>
             <div className="confirmed-actions">
               <button onClick={downloadCalendar} className="confirmed-btn">
@@ -157,43 +180,145 @@ export default function Booking() {
                 💬 Chat via WhatsApp
               </a>
             </div>
-            <button onClick={() => navigate("/")} className="confirmed-home-btn">
+            <button
+              onClick={() => navigate("/")}
+              className="confirmed-home-btn"
+            >
               Terug naar Home
             </button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="booking-page">
       {showInstructionsModal && (
-        <div style={{position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'#0008', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center'}}>
-          <div className="instructions-modal" style={{background:'#fff8dc', borderRadius:16, padding:'32px 24px', maxWidth:500, width:'95%', boxShadow:'0 4px 24px #db277799', position:'relative', maxHeight:'90vh', overflowY:'auto', display:'flex', flexDirection:'column'}}>
-            <h2 style={{color:'#db2777', marginBottom:16, textAlign:'center'}}>⚠️ Voorzorg & Nazorg instructies</h2>
-            <ul style={{marginBottom:24}}>
-              <li>Scheer het behandelgebied 12 tot 24 uur voor de behandeling</li>
-              <li>Zorg ervoor dat je de huid niet bruint en vermijd directe blootstelling aan de zon op het te behandelen gebied (minimaal 2 weken voor de behandeling). We kunnen je helaas niet behandelen als je huid gebruind is.</li>
-              <li>Gebruik geen zelfbruiners of bruiningsproducten zoals vochtregulerende zelfbruiners (2 weken voorafgaand), zonnebank (4 weken voorafgaand) en gebruik geen bruiningsmedicijnen zoals Melatonine II (6 maanden voorafgaand).</li>
-              <li>Draag tijdens de behandeling en daarna loszittende kleding van natuurlijke stoffen om wrijving en huidirritatie te voorkomen.</li>
-              <li>Houd de huid schoon en vermijd het gebruik van lotions of crèmes op het behandelde gebied op de dag van de behandeling</li>
-              <li>Vermijd vitamine A- of retinolproducten (1 week voorafgaand)</li>
-              <li>Het behandelgebied niet harsen, epileren met draad (threading) of epileren (4 weken voorafgaand)</li>
-              <li>Vermijd huidbehandelingen zoals microneedling, chemische peelings en overige intensieve behandelingen (2 weken voorafgaand) en vitamine A peelings (4 weken voorafgaand)</li>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "#0008",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            className="instructions-modal"
+            style={{
+              background: "#fff8dc",
+              borderRadius: 16,
+              padding: "32px 24px",
+              maxWidth: 500,
+              width: "95%",
+              boxShadow: "0 4px 24px #db277799",
+              position: "relative",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <h2
+              style={{
+                color: "#db2777",
+                marginBottom: 16,
+                textAlign: "center",
+              }}
+            >
+              ⚠️ Voorzorg & Nazorg instructies
+            </h2>
+            <ul style={{ marginBottom: 24 }}>
+              <li>
+                Scheer het behandelgebied 12 tot 24 uur voor de behandeling
+              </li>
+              <li>
+                Zorg ervoor dat je de huid niet bruint en vermijd directe
+                blootstelling aan de zon op het te behandelen gebied (minimaal 2
+                weken voor de behandeling). We kunnen je helaas niet behandelen
+                als je huid gebruind is.
+              </li>
+              <li>
+                Gebruik geen zelfbruiners of bruiningsproducten zoals
+                vochtregulerende zelfbruiners (2 weken voorafgaand), zonnebank
+                (4 weken voorafgaand) en gebruik geen bruiningsmedicijnen zoals
+                Melatonine II (6 maanden voorafgaand).
+              </li>
+              <li>
+                Draag tijdens de behandeling en daarna loszittende kleding van
+                natuurlijke stoffen om wrijving en huidirritatie te voorkomen.
+              </li>
+              <li>
+                Houd de huid schoon en vermijd het gebruik van lotions of crèmes
+                op het behandelde gebied op de dag van de behandeling
+              </li>
+              <li>
+                Vermijd vitamine A- of retinolproducten (1 week voorafgaand)
+              </li>
+              <li>
+                Het behandelgebied niet harsen, epileren met draad (threading)
+                of epileren (4 weken voorafgaand)
+              </li>
+              <li>
+                Vermijd huidbehandelingen zoals microneedling, chemische
+                peelings en overige intensieve behandelingen (2 weken
+                voorafgaand) en vitamine A peelings (4 weken voorafgaand)
+              </li>
             </ul>
-            <h2 style={{color:'#db2777', marginBottom:16}}>Verzorging na de behandeling</h2>
-            <ul style={{marginBottom:24}}>
-              <li>Gebruik de producten aanbevolen door jouw therapeut, inclusief Cooling Gel</li>
-              <li>5 Dagen na de behandeling mag je het behandelde gebied handmatig scrubben</li>
-              <li>Vermijd directe blootstelling aan de zon gedurende 2 weken en zorg ervoor dat je dagelijks een SPF draagt</li>
-              <li>Vermijd directe hitte of hete douches gedurende de eerste 1 tot 2 dagen na jouw behandeling</li>
-              <li>Vermijd sporten, sauna's, spa's en stoombaden gedurende 5 dagen na de behandeling</li>
+            <h2 style={{ color: "#db2777", marginBottom: 16 }}>
+              Verzorging na de behandeling
+            </h2>
+            <ul style={{ marginBottom: 24 }}>
+              <li>
+                Gebruik de producten aanbevolen door jouw therapeut, inclusief
+                Cooling Gel
+              </li>
+              <li>
+                5 Dagen na de behandeling mag je het behandelde gebied handmatig
+                scrubben
+              </li>
+              <li>
+                Vermijd directe blootstelling aan de zon gedurende 2 weken en
+                zorg ervoor dat je dagelijks een SPF draagt
+              </li>
+              <li>
+                Vermijd directe hitte of hete douches gedurende de eerste 1 tot
+                2 dagen na jouw behandeling
+              </li>
+              <li>
+                Vermijd sporten, sauna's, spa's en stoombaden gedurende 5 dagen
+                na de behandeling
+              </li>
               <li>Vermijd wrijven, pulken of krabben aan de huid</li>
             </ul>
-            <div style={{position:'sticky', bottom:0, left:0, background:'inherit', paddingTop:8, marginTop:'auto'}}>
+            <div
+              style={{
+                position: "sticky",
+                bottom: 0,
+                left: 0,
+                background: "inherit",
+                paddingTop: 8,
+                marginTop: "auto",
+              }}
+            >
               <button
-                style={{background:'#db2777', color:'#fff', border:'none', borderRadius:8, padding:'12px 24px', fontWeight:600, fontSize:'1rem', width:'100%', cursor:'pointer'}}
+                style={{
+                  background: "#db2777",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "12px 24px",
+                  fontWeight: 600,
+                  fontSize: "1rem",
+                  width: "100%",
+                  cursor: "pointer",
+                }}
                 onClick={() => setShowInstructionsModal(false)}
               >
                 Ik heb de instructies gelezen
@@ -204,22 +329,65 @@ export default function Booking() {
       )}
       <div className="booking-container">
         <button
-          style={{position:'absolute', top:18, right:18, background:'#f59e0b', color:'#fff', border:'none', borderRadius:'50%', width:40, height:40, fontSize:'1.5rem', cursor:'pointer', zIndex:10}}
+          style={{
+            position: "absolute",
+            top: 18,
+            right: 18,
+            background: "#f59e0b",
+            color: "#fff",
+            border: "none",
+            borderRadius: "50%",
+            width: 40,
+            height: 40,
+            fontSize: "1.5rem",
+            cursor: "pointer",
+            zIndex: 10,
+          }}
           title="Bekijk instructies"
           onClick={() => setShowInstructionsModal(true)}
-        >ℹ️</button>
+        >
+          ℹ️
+        </button>
         <div className="booking-header">
           <h1 className="booking-title">Boek Je Speciale Aanbieding</h1>
           <p className="booking-subtitle">
-            Volledig lichaam behandeling voor slechts €200 (normaal €300). Beperkte tijd aanbieding!
+            Volledig lichaam behandeling voor slechts €200 (normaal €300).
+            Beperkte tijd aanbieding!
           </p>
+          <div
+            className="booking-deposit-notice"
+            style={{
+              backgroundColor: "#fff8dc",
+              border: "1px solid #f59e0b",
+              borderRadius: "8px",
+              padding: "12px",
+              marginTop: "12px",
+              fontSize: "0.95rem",
+            }}
+          >
+            <p style={{ margin: 0, color: "#b45309" }}>
+              <strong>💡 Reserveringsborg:</strong> Bij het boeken vragen wij
+              een borg van €20. Dit bedrag wordt volledig verrekend met de
+              behandeling tijdens uw bezoek.
+            </p>
+          </div>
         </div>
 
         <div className="booking-stepper">
           {[1, 2, 3, 4].map((s) => (
             <div key={s} className="stepper-item">
-              <div className={`stepper-number ${step >= s ? "stepper-active" : ""}`}>{step > s ? "✓" : s}</div>
-              <span className={`stepper-label ${step >= s ? "stepper-label-active" : ""}`}>
+              <div
+                className={`stepper-number ${
+                  step >= s ? "stepper-active" : ""
+                }`}
+              >
+                {step > s ? "✓" : s}
+              </div>
+              <span
+                className={`stepper-label ${
+                  step >= s ? "stepper-label-active" : ""
+                }`}
+              >
                 {s === 1 && "Pakket"}
                 {s === 2 && "Datum & Tijd"}
                 {s === 3 && "Gegevens"}
@@ -238,14 +406,18 @@ export default function Booking() {
                   <button
                     key={pkg.id}
                     onClick={() => updateBookingData("pkg", pkg.id)}
-                    className={`package-option ${bookingData.pkg === pkg.id ? "package-selected" : ""} ${pkg.isSpecial ? "package-special" : ""}`}
+                    className={`package-option ${
+                      bookingData.pkg === pkg.id ? "package-selected" : ""
+                    } ${pkg.isSpecial ? "package-special" : ""}`}
                   >
                     <div className="package-icon">{pkg.icon}</div>
                     <div className="package-name">{pkg.name}</div>
                     <div className="package-pricing">
                       <div className="package-price">{pkg.price}</div>
                       {pkg.originalPrice && (
-                        <div className="package-original-price">{pkg.originalPrice}</div>
+                        <div className="package-original-price">
+                          {pkg.originalPrice}
+                        </div>
                       )}
                     </div>
                     <div className="package-desc">{pkg.description}</div>
@@ -253,7 +425,10 @@ export default function Booking() {
                 ))}
               </div>
               <div className="special-offer-note">
-                <p>🔥 Beperkte tijd aanbieding - Bespaar €100 op onze volledige lichaam behandeling!</p>
+                <p>
+                  🔥 Beperkte tijd aanbieding - Bespaar €100 op onze volledige
+                  lichaam behandeling!
+                </p>
               </div>
             </div>
           )}
@@ -270,12 +445,22 @@ export default function Booking() {
                         key={index}
                         onClick={() => updateBookingData("date", date)}
                         className={`date-option ${
-                          bookingData.date?.toDateString() === date.toDateString() ? "date-selected" : ""
+                          bookingData.date?.toDateString() ===
+                          date.toDateString()
+                            ? "date-selected"
+                            : ""
                         }`}
                       >
-                        <div className="date-day">{date.toLocaleDateString("nl-NL", { weekday: "short" })}</div>
+                        <div className="date-day">
+                          {date.toLocaleDateString("nl-NL", {
+                            weekday: "short",
+                          })}
+                        </div>
                         <div className="date-date">
-                          {date.toLocaleDateString("nl-NL", { month: "short", day: "numeric" })}
+                          {date.toLocaleDateString("nl-NL", {
+                            month: "short",
+                            day: "numeric",
+                          })}
                         </div>
                       </button>
                     ))}
@@ -288,7 +473,9 @@ export default function Booking() {
                       <button
                         key={time}
                         onClick={() => updateBookingData("time", time)}
-                        className={`time-option ${bookingData.time === time ? "time-selected" : ""}`}
+                        className={`time-option ${
+                          bookingData.time === time ? "time-selected" : ""
+                        }`}
                       >
                         {time}
                       </button>
@@ -319,7 +506,9 @@ export default function Booking() {
                     <input
                       type="text"
                       value={bookingData.name}
-                      onChange={(e) => updateBookingData("name", e.target.value)}
+                      onChange={(e) =>
+                        updateBookingData("name", e.target.value)
+                      }
                       placeholder="Jan Jansen"
                       className="form-input"
                     />
@@ -329,7 +518,9 @@ export default function Booking() {
                     <input
                       type="email"
                       value={bookingData.email}
-                      onChange={(e) => updateBookingData("email", e.target.value)}
+                      onChange={(e) =>
+                        updateBookingData("email", e.target.value)
+                      }
                       placeholder="jan@voorbeeld.nl"
                       className="form-input"
                     />
@@ -339,7 +530,9 @@ export default function Booking() {
                     <input
                       type="tel"
                       value={bookingData.phone}
-                      onChange={(e) => updateBookingData("phone", e.target.value)}
+                      onChange={(e) =>
+                        updateBookingData("phone", e.target.value)
+                      }
                       placeholder="+31 6 1234 5678"
                       className="form-input"
                     />
@@ -347,10 +540,14 @@ export default function Booking() {
                 </div>
                 <div className="form-right">
                   <div className="form-group">
-                    <label className="form-label">Opmerkingen (Optioneel)</label>
+                    <label className="form-label">
+                      Opmerkingen (Optioneel)
+                    </label>
                     <textarea
                       value={bookingData.notes}
-                      onChange={(e) => updateBookingData("notes", e.target.value)}
+                      onChange={(e) =>
+                        updateBookingData("notes", e.target.value)
+                      }
                       placeholder="Vertel ons over uw doelen, gevoelige gebieden, of eventuele vragen."
                       rows={8}
                       className="form-textarea"
@@ -364,12 +561,31 @@ export default function Booking() {
           {step === 4 && (
             <div className="step-content">
               <h2 className="step-title">Controleren & Bevestigen</h2>
+              <div
+                className="booking-deposit-notice"
+                style={{
+                  backgroundColor: "#fff8dc",
+                  border: "1px solid #f59e0b",
+                  borderRadius: "8px",
+                  padding: "16px",
+                  marginBottom: "20px",
+                }}
+              >
+                <p style={{ margin: 0, color: "#b45309", fontSize: "0.95rem" }}>
+                  <strong>💰 Betaling:</strong> Er wordt nu een borg van €20 in
+                  rekening gebracht. Dit bedrag wordt volledig verrekend met uw
+                  behandeling tijdens het bezoek. Na betaling is uw afspraak
+                  definitief bevestigd.
+                </p>
+              </div>
               <div className="booking-summary">
                 <h3 className="summary-title">Afspraak Overzicht</h3>
                 <div className="summary-details">
                   <div className="summary-row">
                     <span>Pakket:</span>
-                    <span>{packages.find((p) => p.id === bookingData.pkg)?.name}</span>
+                    <span>
+                      {packages.find((p) => p.id === bookingData.pkg)?.name}
+                    </span>
                   </div>
                   <div className="summary-row">
                     <span>Datum:</span>
@@ -405,7 +621,10 @@ export default function Booking() {
 
         <div className="booking-actions">
           {step > 1 && (
-            <button onClick={() => setStep(step - 1)} className="action-btn action-btn-secondary">
+            <button
+              onClick={() => setStep(step - 1)}
+              className="action-btn action-btn-secondary"
+            >
               ← Terug
             </button>
           )}
@@ -421,18 +640,29 @@ export default function Booking() {
             </button>
           ) : (
             <div>
-              <div style={{marginBottom:16}}>
-                <label style={{display:'flex', alignItems:'center', fontWeight:500, color:'#db2777'}}>
+              <div style={{ marginBottom: 16 }}>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    fontWeight: 500,
+                    color: "#db2777",
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={instructionsChecked}
-                    onChange={e => setInstructionsChecked(e.target.checked)}
-                    style={{marginRight:8, accentColor:'#db2777'}}
+                    onChange={(e) => setInstructionsChecked(e.target.checked)}
+                    style={{ marginRight: 8, accentColor: "#db2777" }}
                   />
                   Ik heb de voorzorg & nazorg instructies gelezen en begrepen
                 </label>
               </div>
-              <button onClick={handleSubmit} disabled={submitting || !instructionsChecked} className="action-btn action-btn-primary">
+              <button
+                onClick={handleSubmit}
+                disabled={submitting || !instructionsChecked}
+                className="action-btn action-btn-primary"
+              >
                 {submitting ? (
                   <>
                     <span className="loading-spinner">⏳</span>
@@ -447,5 +677,5 @@ export default function Booking() {
         </div>
       </div>
     </div>
-  )
+  );
 }

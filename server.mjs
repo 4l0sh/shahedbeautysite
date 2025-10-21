@@ -2,16 +2,14 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import sgMail from "@sendgrid/mail";
-import { createMollieClient } from "@mollie/api-client";
+import { createMollie } from "@mollie/api-client";
 
 dotenv.config();
 
 const app = express();
 const port = 4000;
 
-const mollieClient = createMollieClient({
-  apiKey: process.env.MOLLIE_API_KEY,
-});
+const mollieClient = createMollie({ apiKey: process.env.MOLLIE_API_KEY });
 app.post("/api/create-payment", async (req, res) => {
   try {
     const { description, orderId } = req.body;
