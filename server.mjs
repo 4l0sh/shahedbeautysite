@@ -2,7 +2,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import sgMail from "@sendgrid/mail";
-import createMollieClient from "@mollie/api-client";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const { createMollieClient } = require("@mollie/api-client");
 
 dotenv.config();
 
@@ -61,6 +63,8 @@ app.use(
   })
 );
 app.use(express.json());
+// Support Mollie webhook (application/x-www-form-urlencoded)
+app.use(express.urlencoded({ extended: true }));
 
 // MongoDB connection removed
 
