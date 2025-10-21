@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import sgMail from "@sendgrid/mail";
-import { createMollieClient } from "@mollie/api-node";
+import { createMollieClient } from "@mollie/api-client";
 
 dotenv.config();
 
