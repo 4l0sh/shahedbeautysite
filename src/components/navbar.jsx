@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Logo from '../assets/shlogo.png'
-import './navbar.css'
+import { useState } from "react";
+import Logo from "../assets/shlogo.png";
+import "./navbar.css";
 
 export default function Navbar({ onNavigate }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="navbar">
@@ -17,13 +17,13 @@ export default function Navbar({ onNavigate }) {
 
         <nav className="navbar-nav desktop-nav">
           <a href="#technology" className="nav-link">
-            Technology
+            Technologie
           </a>
           <a href="#packages" className="nav-link">
-            Packages
+            Pakketten
           </a>
           <a href="#results" className="nav-link">
-            Results
+            Resultaten
           </a>
           <a href="#contact" className="nav-link">
             Contact
@@ -31,16 +31,10 @@ export default function Navbar({ onNavigate }) {
         </nav>
 
         <div className="navbar-actions desktop-actions">
-          <a
-            href="tel:+1234567890"
-            className="call-link"
-          >
+          <a href="tel:+1234567890" className="call-link">
             📞 Bel
           </a>
-          <button
-            onClick={() => onNavigate("booking")}
-            className="book-btn"
-          >
+          <button onClick={() => onNavigate("booking")} className="book-btn">
             Boek Nu
           </button>
         </div>
@@ -78,5 +72,5 @@ export default function Navbar({ onNavigate }) {
         </div>
       )}
     </header>
-  )
+  );
 }

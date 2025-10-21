@@ -1,10 +1,16 @@
-import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
-import Navbar from './components/navbar'
-import Homepage from './homepage/homepage'
-import Booking from './booking/booking'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
+import Navbar from "./components/navbar";
+import Homepage from "./homepage/homepage";
+import Booking from "./booking/booking";
+import PaymentSuccess from "./components/payment/PaymentSuccess";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 function AppContent() {
   const navigate = useNavigate();
@@ -23,6 +29,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Homepage onNavigate={handleNavigation} />} />
         <Route path="/booking" element={<Booking />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
       </Routes>
     </div>
   );
@@ -33,7 +40,7 @@ function App() {
     <Router>
       <AppContent />
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

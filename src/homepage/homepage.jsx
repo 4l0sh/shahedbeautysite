@@ -1,12 +1,11 @@
-import { useState } from "react"
-import './homepage.css'
-import Device from './../Photos/device.png'
-import HederDevice from '../Photos/headerDevice.png'
-import Before1 from '../Photos/before-1.png'
-import After1 from '../Photos/after-1.png'
-import Before2 from '../Photos/before2.jpg'
-import After2 from '../Photos/after2.jpg'
-
+import { useState } from "react";
+import "./homepage.css";
+import Device from "./../Photos/device.png";
+import HederDevice from "../Photos/headerDevice.png";
+import Before1 from "../Photos/before-1.png";
+import After1 from "../Photos/after-1.png";
+import Before2 from "../Photos/before2.jpg";
+import After2 from "../Photos/after2.jpg";
 
 export default function Homepage({ onNavigate }) {
   return (
@@ -18,7 +17,7 @@ export default function Homepage({ onNavigate }) {
       <ContactSection />
       <Footer />
     </main>
-  )
+  );
 }
 
 function HeroSection({ onNavigate }) {
@@ -34,22 +33,57 @@ function HeroSection({ onNavigate }) {
 
       <div className="hero-content">
         <h1 className="hero-title">
-          Neem zo snel mogelijk contact met ons op en ervaar de uitlime kracht van onze ICONIC Diamond Diode Laser 2024 en bereik buitengewone resultaten.
+          Professionele ontharing in Utrecht met de Diamond Diode Laser 2024.
+          Pijnloos, effectief en langdurig resultaat voor alle huidtypen. Erkend
+          door ANBOS en vergoed door zorgverzekeraars.
         </h1>
-        <p className="hero-subtitle">
-          We werken met alle zorgverzekeraars.
-        </p>
+        {/* <p className="hero-subtitle">
+          We werken met alle zorgverzekeraars.<br/>
+          <span style={{color:'#db2777', fontWeight:600}}>Erkend bij ANBOS</span>
+        </p> */}
+
+        <div
+          className="hero-badges"
+          style={{ display: "flex", gap: "12px", margin: "12px 0" }}
+        >
+          <span
+            className="hero-badge"
+            style={{
+              background: "#e0f7fa",
+              color: "#00796b",
+              padding: "6px 14px",
+              borderRadius: "16px",
+              fontWeight: 500,
+              fontSize: "0.95rem",
+            }}
+          >
+            Wij werken met zorgverzekeraars
+          </span>
+          <span
+            className="hero-badge"
+            style={{
+              background: "#fff3e0",
+              color: "#db2777",
+              padding: "6px 14px",
+              borderRadius: "16px",
+              fontWeight: 500,
+              fontSize: "0.95rem",
+            }}
+          >
+            Erkend bij ANBOS
+          </span>
+        </div>
 
         <div className="hero-buttons">
           <a href="#packages" className="hero-btn-white">
             Bekijk onze pakketten
           </a>
-            <button
+          <button
             onClick={() => onNavigate("booking")}
             className="hero-btn-emerald"
           >
             <p className="btnText">Boek Nu</p>
-             <i className="appoinmentButton fa-solid fa-calendar-days"></i>
+            <i className="appoinmentButton fa-solid fa-calendar-days"></i>
           </button>
         </div>
 
@@ -61,45 +95,44 @@ function HeroSection({ onNavigate }) {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 function TechnologySection() {
   const features = [
-     {
-    icon: "🔍",
-    title: "Hair & Skin Analyzer",
-    text: "Geavanceerde analyse voor veilige en op maat gemaakte behandelingen.",
-  },
     {
-    icon: "⚡",
-    title: "Extreme Kracht",
-    text: "Met maar liefst 5000W vermogen voor razendsnelle en effectieve behandelingen.",
-  },
-   {
-    icon: "🔇",
-    title: "SuperSilent Technologie",
-    text: "Krachtige prestaties met een fluisterstille motor voor meer comfort.",
-  },
+      icon: "🔍",
+      title: "Hair & Skin Analyzer",
+      text: "Geavanceerde analyse voor veilige en op maat gemaakte behandelingen.",
+    },
     {
-    icon: "🎯",
-    title: "Maximale Precisie",
-    text: "Extra detailopzetstuk voor nauwkeurige behandelingen en perfecte resultaten.",
-  },
-  ]
+      icon: "⚡",
+      title: "Extreme Kracht",
+      text: "Met maar liefst 5000W vermogen voor razendsnelle en effectieve behandelingen.",
+    },
+    {
+      icon: "🔇",
+      title: "SuperSilent Technologie",
+      text: "Krachtige prestaties met een fluisterstille motor voor meer comfort.",
+    },
+    {
+      icon: "🎯",
+      title: "Maximale Precisie",
+      text: "Extra detailopzetstuk voor nauwkeurige behandelingen en perfecte resultaten.",
+    },
+  ];
 
   return (
     <section id="technology" className="tech-section">
       <div className="tech-header">
-        <h1 className="tech-title">
-          Diamond Diode Laser 2024
-        </h1>
+        <h1 className="tech-title">Diamond Diode Laser 2024</h1>
         <h2 className="tech-title">
-          De krachtigste Diode laser nu op de markt voor een perfect glad lichaam.
-          
+          Geavanceerde laserontharing met de nieuwste technologie voor alle
+          huidtypes en haarkleuren.
         </h2>
         <p className="tech-subtitle">
-          Onze diode laser is hier in Nederland ontwerpt bij Beauty Business Holland.
+          Ontwikkeld en gecertificeerd in Nederland, perfect afgestemd op de
+          Nederlandse markt en veiligheidsnormen.
         </p>
       </div>
 
@@ -127,7 +160,7 @@ function TechnologySection() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 function PackagesSection({ onNavigate }) {
@@ -140,7 +173,7 @@ function PackagesSection({ onNavigate }) {
       features: [
         "Oksel, bikini en onderbenen",
         "Pijnloos bij -24°C",
-        "Snelle resultaten"
+        "Snelle resultaten",
       ],
       icon: "🦵",
       isSpecial: false,
@@ -154,7 +187,7 @@ function PackagesSection({ onNavigate }) {
         "Alle lichaamsdelen inbegrepen",
         "Pijnloos bij -24°C",
         "Gratis nabehandeling",
-        "Speciale aanbieding!"
+        "Speciale aanbieding!",
       ],
       icon: "💎",
       isSpecial: true,
@@ -164,28 +197,29 @@ function PackagesSection({ onNavigate }) {
       name: "Oksel en bikini",
       price: "€75",
       description: "Oksel en bikini behandeling",
-      features: [
-        "Oksel en bikini",
-        "Pijnloos bij -24°C",
-        "Snelle resultaten"
-      ],
-      icon: "�",
+      features: ["Oksel en bikini", "Pijnloos bij -24°C", "Snelle resultaten"],
+      icon: "👙",
       isSpecial: false,
     },
-  ]
+  ];
 
   return (
     <section id="packages" className="packages-section">
       <div className="packages-header">
-        <h2 className="packages-title">Speciale Aanbieding</h2>
+        <h2 className="packages-title">Voordelige Behandelpakketten</h2>
         <p className="packages-subtitle">
-          Profiteer nu van onze exclusieve korting op onze volledig lichaam behandeling met de nieuwste Diamond Diode Laser technologie.
+          Ontdek onze complete behandelpakketten voor permanente ontharing.
+          Profiteer van speciale tarieven op volledige lichaamsbehandelingen met
+          gegarandeerde resultaten na 6-8 sessies.
         </p>
       </div>
 
       <div className="packages-grid single-package">
         {packages.map((pkg) => (
-          <div key={pkg.id} className={`package-card ${pkg.isSpecial ? 'package-special' : ''}`}>
+          <div
+            key={pkg.id}
+            className={`package-card ${pkg.isSpecial ? "package-special" : ""}`}
+          >
             <div className="package-badge">
               <span className="package-badge-icon">{pkg.icon}</span>
               <span className="package-badge-text">{pkg.name}</span>
@@ -193,7 +227,9 @@ function PackagesSection({ onNavigate }) {
             <div className="package-pricing">
               <div className="package-price">{pkg.price}</div>
               {pkg.originalPrice && (
-                <div className="package-original-price">{pkg.originalPrice}</div>
+                <div className="package-original-price">
+                  {pkg.originalPrice}
+                </div>
               )}
             </div>
             <p className="package-description">{pkg.description}</p>
@@ -214,10 +250,7 @@ function PackagesSection({ onNavigate }) {
               >
                 Boek Nu - {pkg.price}
               </button>
-              <a
-                href="#contact"
-                className="package-btn-secondary"
-              >
+              <a href="#contact" className="package-btn-secondary">
                 Meer Informatie
               </a>
             </div>
@@ -225,11 +258,11 @@ function PackagesSection({ onNavigate }) {
         ))}
       </div>
     </section>
-  )
+  );
 }
 
 function TestimonialsSection() {
-  const [sliderPos, setSliderPos] = useState(50)
+  const [sliderPos, setSliderPos] = useState(50);
 
   const reviews = [
     {
@@ -240,21 +273,29 @@ function TestimonialsSection() {
     {
       name: "Jaspreet K.",
       rating: 5,
-      text: "Safe on my skin tone and super efficient. The cooling makes a big difference!",
+      text: "Ik ben zo blij met mijn resultaten na slechts een paar sessies! Mijn huid voelt zo glad en zacht aan.",
     },
-    { name: "Daniel R.", rating: 4, text: "I tried full-body bundle — saved time and money. Highly recommend." },
-  ]
+    {
+      name: "Daniel R.",
+      rating: 4,
+      text: "Ik heb de full-body bundle geprobeerd - tijd en geld bespaard. Zeer aan te bevelen.",
+    },
+  ];
 
   return (
     <section id="results" className="testimonials-section">
       <div className="testimonials-header">
-        <h2 className="testimonials-title">Resultaten</h2>
-        <p className="testimonials-subtitle">Echte klanten. Echte resultaten. Sleep om voor en na te vergelijken.</p>
+        <h2 className="testimonials-title">Bewezen Resultaten</h2>
+        <p className="testimonials-subtitle">
+          Ontdek de transformerende resultaten van onze laserontharing
+          behandelingen. Bekijk voor- en na foto's van tevreden klanten en lees
+          hun ervaringen.
+        </p>
       </div>
 
       <div className="before-after-grid">
-    <BeforeAfterCard area="Legs" before={Before1} after={After1} />
-    <BeforeAfterCard area="Arms" before={Before2} after={After2} />
+        <BeforeAfterCard area="Benen" before={Before1} after={After1} />
+        <BeforeAfterCard area="Armen" before={Before2} after={After2} />
       </div>
 
       <div className="reviews-grid">
@@ -262,7 +303,12 @@ function TestimonialsSection() {
           <div key={index} className="review-card">
             <div className="review-stars">
               {[...Array(5)].map((_, i) => (
-                <span key={i} className={i < review.rating ? "text-amber-400" : "text-gray-300"}>
+                <span
+                  key={i}
+                  className={
+                    i < review.rating ? "text-amber-400" : "text-gray-300"
+                  }
+                >
                   ⭐
                 </span>
               ))}
@@ -273,17 +319,19 @@ function TestimonialsSection() {
         ))}
       </div>
     </section>
-  )
+  );
 }
 
 function BeforeAfterCard({ area, before, after }) {
-  const [pos, setPos] = useState(50)
+  const [pos, setPos] = useState(50);
 
   return (
     <div className="before-after-card">
       <div className="before-after-header">
         <div className="before-after-area">{area}</div>
-        <div className="before-after-instruction">Drag the slider to compare</div>
+        <div className="before-after-instruction">
+          beweeg de slider om te vergelijken
+        </div>
       </div>
       <div className="before-after-container">
         <img
@@ -313,40 +361,44 @@ function BeforeAfterCard({ area, before, after }) {
         onChange={(e) => setPos(Number(e.target.value))}
       />
     </div>
-  )
+  );
 }
 
 function ContactSection() {
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" })
-  const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    
+    e.preventDefault();
+    setLoading(true);
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
     try {
-      const response = await fetch('http://localhost:4000/api/contact', {
-        method: 'POST',
+      const response = await fetch(`${apiUrl}/api/contact`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        setSent(true)
-        setFormData({ name: "", email: "", message: "" })
+        setSent(true);
+        setFormData({ name: "", email: "", message: "" });
       } else {
-        throw new Error('Failed to send message')
+        throw new Error("Failed to send message");
       }
     } catch (error) {
-      console.error('Error sending contact form:', error)
-      alert('Er is een fout opgetreden. Probeer het opnieuw.')
+      console.error("Error sending contact form:", error);
+      alert("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <section id="contact" className="contact-section">
@@ -370,7 +422,10 @@ function ContactSection() {
               <a href="tel:+31 6 85235657" className="contact-action-btn">
                 📞 Call
               </a>
-              <a href="https://wa.me/31686116982" className="contact-action-btn">
+              <a
+                href="https://wa.me/31686116982"
+                className="contact-action-btn"
+              >
                 💬 WhatsApp
               </a>
             </div>
@@ -383,7 +438,9 @@ function ContactSection() {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="contact-form-input"
               required
             />
@@ -393,7 +450,9 @@ function ContactSection() {
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               className="contact-form-input"
               required
             />
@@ -402,7 +461,9 @@ function ContactSection() {
             <label className="contact-form-label">Message</label>
             <textarea
               value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, message: e.target.value })
+              }
               className="contact-form-textarea"
               rows={4}
               required
@@ -415,14 +476,20 @@ function ContactSection() {
           >
             {loading ? "Verzenden..." : "Verzend Bericht"}
           </button>
-          {sent && <div className="contact-form-success">
-            Bedankt! We nemen snel contact met u op.<br/>
-            <small>Controleer ook uw spam/ongewenste mail folder voor onze bevestiging.</small>
-          </div>}
+          {sent && (
+            <div className="contact-form-success">
+              Bedankt! We nemen snel contact met u op.
+              <br />
+              <small>
+                Controleer ook uw spam/ongewenste mail folder voor onze
+                bevestiging.
+              </small>
+            </div>
+          )}
         </form>
       </div>
     </section>
-  )
+  );
 }
 
 function Footer() {
@@ -440,5 +507,5 @@ function Footer() {
         </nav>
       </div>
     </footer>
-  )
+  );
 }

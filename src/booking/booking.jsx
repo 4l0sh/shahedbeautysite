@@ -42,7 +42,7 @@ export default function Booking() {
       name: "Oksel en bikini",
       price: "€75",
       description: "Oksel en bikini behandeling",
-      icon: "�",
+      icon: "👙",
       isSpecial: false,
     },
   ]
@@ -170,7 +170,7 @@ export default function Booking() {
     <div className="booking-page">
       {showInstructionsModal && (
         <div style={{position:'fixed', top:0, left:0, width:'100vw', height:'100vh', background:'#0008', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center'}}>
-          <div style={{background:'#fff8dc', borderRadius:16, padding:'32px 24px', maxWidth:500, width:'90%', boxShadow:'0 4px 24px #db277799', position:'relative'}}>
+          <div className="instructions-modal" style={{background:'#fff8dc', borderRadius:16, padding:'32px 24px', maxWidth:500, width:'95%', boxShadow:'0 4px 24px #db277799', position:'relative', maxHeight:'90vh', overflowY:'auto', display:'flex', flexDirection:'column'}}>
             <h2 style={{color:'#db2777', marginBottom:16, textAlign:'center'}}>⚠️ Voorzorg & Nazorg instructies</h2>
             <ul style={{marginBottom:24}}>
               <li>Scheer het behandelgebied 12 tot 24 uur voor de behandeling</li>
@@ -191,12 +191,14 @@ export default function Booking() {
               <li>Vermijd sporten, sauna's, spa's en stoombaden gedurende 5 dagen na de behandeling</li>
               <li>Vermijd wrijven, pulken of krabben aan de huid</li>
             </ul>
-            <button
-              style={{background:'#db2777', color:'#fff', border:'none', borderRadius:8, padding:'12px 24px', fontWeight:600, fontSize:'1rem', width:'100%', cursor:'pointer'}}
-              onClick={() => setShowInstructionsModal(false)}
-            >
-              Ik heb de instructies gelezen
-            </button>
+            <div style={{position:'sticky', bottom:0, left:0, background:'inherit', paddingTop:8, marginTop:'auto'}}>
+              <button
+                style={{background:'#db2777', color:'#fff', border:'none', borderRadius:8, padding:'12px 24px', fontWeight:600, fontSize:'1rem', width:'100%', cursor:'pointer'}}
+                onClick={() => setShowInstructionsModal(false)}
+              >
+                Ik heb de instructies gelezen
+              </button>
+            </div>
           </div>
         </div>
       )}
