@@ -68,7 +68,7 @@ app.post("/api/create-payment", async (req, res) => {
 
     const payment = await mollieClient.payments.create({
       amount: {
-        value: "20.00",
+        value: "00.01",
         currency: "EUR",
       },
       description: description,
