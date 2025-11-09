@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { saveAppointmentToDatabase } from "../utils/saveAppointment";
 import "./booking.css";
@@ -20,51 +20,57 @@ export default function Booking() {
     notes: "",
   });
 
-  const packages = [
-    {
-      id: "oks-bik-ben",
-      name: "Oksel, bikini en onder benen",
-      price: "€100",
-      description: "Oksel, bikini en onderbenen behandeling",
-      icon: "🦵",
-      isSpecial: false,
-    },
-    {
-      id: "hele-lichaam",
-      name: "Hele lichaam",
-      price: "€199",
-      description: "Volledig lichaam behandeling",
-      icon: "💎",
-      isSpecial: true,
-    },
-    {
-      id: "oks-bik",
-      name: "Oksel en bikini",
-      price: "€75",
-      description: "Oksel en bikini behandeling",
-      icon: "👙",
-      isSpecial: false,
-    },
-  ];
+  // Static options memoized to avoid re-creating each render
+  const packages = useMemo(
+    () => [
+      {
+        id: "oks-bik-ben",
+        name: "Oksel, bikini en onder benen",
+        price: "€100",
+        description: "Oksel, bikini en onderbenen behandeling",
+        icon: "🦵",
+        isSpecial: false,
+      },
+      {
+        id: "hele-lichaam",
+        name: "Hele lichaam",
+        price: "€199",
+        description: "Volledig lichaam behandeling",
+        icon: "💎",
+        isSpecial: true,
+      },
+      {
+        id: "oks-bik",
+        name: "Oksel en bikini",
+        price: "€75",
+        description: "Oksel en bikini behandeling",
+        icon: "👙",
+        isSpecial: false,
+      },
+    ],
+    []
+  );
 
-  const timeSlots = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"];
+  const timeSlots = useMemo(
+    () => ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00"],
+    []
+  );
 
-  const getAvailableDates = () => {
+  const availableDates = useMemo(() => {
     const dates = [];
     const today = new Date();
     for (let i = 1; i <= 14; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
+      date.setHours(0, 0, 0, 0);
       dates.push(date);
     }
     return dates;
-  };
+  }, []);
 
-  const availableDates = getAvailableDates();
-
-  const updateBookingData = (field, value) => {
-    setBookingData({ ...bookingData, [field]: value });
-  };
+  const updateBookingData = useCallback((field, value) => {
+    setBookingData((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   const canContinue = () => {
     if (step === 1) return bookingData.pkg !== "";
@@ -154,7 +160,7 @@ export default function Booking() {
   };
 
   const [instructionsChecked, setInstructionsChecked] = useState(false);
-  const [showInstructionsModal, setShowInstructionsModal] = useState(true);
+  const [showCareInfo, setShowCareInfo] = useState(false);
 
   if (confirmed) {
     return (
@@ -194,182 +200,48 @@ export default function Booking() {
 
   return (
     <div className="booking-page">
-      {showInstructionsModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "#0008",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            className="instructions-modal"
-            style={{
-              background: "#fff8dc",
-              borderRadius: 16,
-              padding: "32px 24px",
-              maxWidth: 500,
-              width: "95%",
-              boxShadow: "0 4px 24px #db277799",
-              position: "relative",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <h2
-              style={{
-                color: "#db2777",
-                marginBottom: 16,
-                textAlign: "center",
-              }}
-            >
-              ⚠️ Voorzorg & Nazorg instructies
-            </h2>
-            <ul style={{ marginBottom: 24 }}>
-              <li>
-                Scheer het behandelgebied 12 tot 24 uur voor de behandeling
-              </li>
-              <li>
-                Zorg ervoor dat je de huid niet bruint en vermijd directe
-                blootstelling aan de zon op het te behandelen gebied (minimaal 2
-                weken voor de behandeling). We kunnen je helaas niet behandelen
-                als je huid gebruind is.
-              </li>
-              <li>
-                Gebruik geen zelfbruiners of bruiningsproducten zoals
-                vochtregulerende zelfbruiners (2 weken voorafgaand), zonnebank
-                (4 weken voorafgaand) en gebruik geen bruiningsmedicijnen zoals
-                Melatonine II (6 maanden voorafgaand).
-              </li>
-              <li>
-                Draag tijdens de behandeling en daarna loszittende kleding van
-                natuurlijke stoffen om wrijving en huidirritatie te voorkomen.
-              </li>
-              <li>
-                Houd de huid schoon en vermijd het gebruik van lotions of crèmes
-                op het behandelde gebied op de dag van de behandeling
-              </li>
-              <li>
-                Vermijd vitamine A- of retinolproducten (1 week voorafgaand)
-              </li>
-              <li>
-                Het behandelgebied niet harsen, epileren met draad (threading)
-                of epileren (4 weken voorafgaand)
-              </li>
-              <li>
-                Vermijd huidbehandelingen zoals microneedling, chemische
-                peelings en overige intensieve behandelingen (2 weken
-                voorafgaand) en vitamine A peelings (4 weken voorafgaand)
-              </li>
-            </ul>
-            <h2 style={{ color: "#db2777", marginBottom: 16 }}>
-              Verzorging na de behandeling
-            </h2>
-            <ul style={{ marginBottom: 24 }}>
-              <li>
-                Gebruik de producten aanbevolen door jouw therapeut, inclusief
-                Cooling Gel
-              </li>
-              <li>
-                5 Dagen na de behandeling mag je het behandelde gebied handmatig
-                scrubben
-              </li>
-              <li>
-                Vermijd directe blootstelling aan de zon gedurende 2 weken en
-                zorg ervoor dat je dagelijks een SPF draagt
-              </li>
-              <li>
-                Vermijd directe hitte of hete douches gedurende de eerste 1 tot
-                2 dagen na jouw behandeling
-              </li>
-              <li>
-                Vermijd sporten, sauna's, spa's en stoombaden gedurende 5 dagen
-                na de behandeling
-              </li>
-              <li>Vermijd wrijven, pulken of krabben aan de huid</li>
-            </ul>
-            <div
-              style={{
-                position: "sticky",
-                bottom: 0,
-                left: 0,
-                background: "inherit",
-                paddingTop: 8,
-                marginTop: "auto",
-              }}
-            >
-              <button
-                style={{
-                  background: "#db2777",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "12px 24px",
-                  fontWeight: 600,
-                  fontSize: "1rem",
-                  width: "100%",
-                  cursor: "pointer",
-                }}
-                onClick={() => setShowInstructionsModal(false)}
-              >
-                Ik heb de instructies gelezen
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       <div className="booking-container">
-        <button
-          style={{
-            position: "absolute",
-            top: 18,
-            right: 18,
-            background: "#f59e0b",
-            color: "#fff",
-            border: "none",
-            borderRadius: "50%",
-            width: 40,
-            height: 40,
-            fontSize: "1.5rem",
-            cursor: "pointer",
-            zIndex: 10,
-          }}
-          title="Bekijk instructies"
-          onClick={() => setShowInstructionsModal(true)}
-        >
-          ℹ️
-        </button>
         <div className="booking-header">
           <h1 className="booking-title">Boek Je Speciale Aanbieding</h1>
           <p className="booking-subtitle">
             Volledig lichaam behandeling voor slechts €200 (normaal €300).
             Beperkte tijd aanbieding!
           </p>
-          <div
-            className="booking-deposit-notice"
-            style={{
-              backgroundColor: "#fff8dc",
-              border: "1px solid #f59e0b",
-              borderRadius: "8px",
-              padding: "12px",
-              marginTop: "12px",
-              fontSize: "0.95rem",
-            }}
-          >
-            <p style={{ margin: 0, color: "#b45309" }}>
-              <strong>💡 Reserveringsborg:</strong> Bij het boeken vragen wij
-              een borg van €20. Dit bedrag wordt volledig verrekend met de
-              behandeling tijdens uw bezoek.
-            </p>
+
+          <div className="callout callout--info">
+            <div className="callout-row">
+              <span>ℹ️ Voorzorg & nazorg instructies</span>
+              <button
+                type="button"
+                className="link-btn"
+                onClick={() => setShowCareInfo((v) => !v)}
+              >
+                {showCareInfo ? "Verberg" : "Bekijk"}
+              </button>
+            </div>
+            {showCareInfo && (
+              <div className="care-body">
+                <h3>Voor de behandeling</h3>
+                <ul>
+                  <li>Scheer het behandelgebied 12–24 uur vooraf</li>
+                  <li>Vermijd zon/zelfbruiners (minimaal 2 weken)</li>
+                  <li>Geen harsen/epileren (4 weken voorafgaand)</li>
+                  <li>
+                    Huid schoon, droog en zonder lotions op de behandeldag
+                  </li>
+                </ul>
+                <h3>Na de behandeling</h3>
+                <ul>
+                  <li>Vermijd hitte/warme douches 1–2 dagen</li>
+                  <li>Vermijd sporten/sauna/spa 5 dagen</li>
+                  <li>Dagelijks SPF, 2 weken zon vermijden</li>
+                  <li>
+                    Niet wrijven of krabben; na 5 dagen mag je handmatig
+                    scrubben
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
@@ -562,20 +434,13 @@ export default function Booking() {
             <div className="step-content">
               <h2 className="step-title">Controleren & Bevestigen</h2>
               <div
-                className="booking-deposit-notice"
-                style={{
-                  backgroundColor: "#fff8dc",
-                  border: "1px solid #f59e0b",
-                  borderRadius: "8px",
-                  padding: "16px",
-                  marginBottom: "20px",
-                }}
+                className="callout callout--warning"
+                style={{ marginBottom: 20 }}
               >
-                <p style={{ margin: 0, color: "#b45309", fontSize: "0.95rem" }}>
-                  <strong>💰 Betaling:</strong> Er wordt nu een borg van €20 in
-                  rekening gebracht. Dit bedrag wordt volledig verrekend met uw
-                  behandeling tijdens het bezoek. Na betaling is uw afspraak
-                  definitief bevestigd.
+                <p style={{ margin: 0 }}>
+                  <strong>💰 Betaling:</strong> Bij bevestigen wordt een borg
+                  van €20 betaald. Dit bedrag wordt verrekend met de
+                  behandeling. Na betaling is uw afspraak definitief bevestigd.
                 </p>
               </div>
               <div className="booking-summary">
